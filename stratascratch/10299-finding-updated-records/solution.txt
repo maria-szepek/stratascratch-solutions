@@ -13,7 +13,7 @@ res = ms_employee_salary.withColumn(
     "first_name",
     "last_name",
     "department_id",
-    "salary"
+    col("salary").alias("current_salary")
 ).orderBy(
     col('id').asc()
 )
