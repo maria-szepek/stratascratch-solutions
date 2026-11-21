@@ -3,21 +3,28 @@ import pyspark
 from pyspark.sql.functions import * 
 from pyspark.sql.window import Window
 # Start writing code
-res = worker.join(
-    title,
-    worker['worker_id'] == title['worker_ref_id'],
-    'inner'
-).withColumn(
-    'salary_rank',
-    dense_rank().over(Window.orderBy(col('salary').desc()))
-).filter(
-    col('salary_rank') == 1
-).select(
-    col('worker_title')
-).dropDuplicates()\
-.withColumnRenamed(
-    'worker_title',
-    'best_paid_title'
+res = (
+    worker
+    .join(
+        title,
+        worker['worker_id'] == title['worker_ref_id'],
+        'inner'
+    )
+    .withColumn(
+        'salary_rank',
+        dense_rank().over(Window.orderBy(col('salary').desc()))
+    )
+    .filter(
+        col('salary_rank') == 1
+    )
+    .select(
+        col('worker_title')
+    )
+    .dropDuplicates()
+    .withColumnRenamed(
+        'worker_title',
+        'best_paid_title'
+    )
 )
 # .filter(
 #     col('salary_rank') == 1
