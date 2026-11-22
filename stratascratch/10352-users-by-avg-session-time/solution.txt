@@ -1,0 +1,30 @@
+# Import your libraries
+import pyspark
+from pyspark.sql.functions import *
+from pyspark.sql.types import *
+from pyspark.sql.window import Window
+
+# Start writing code
+res = (
+    facebook_web_log
+    .withColumn('date', date_trunc('day', 'timestamp'))
+    .groupBy('user_id', 'date')
+    .agg(
+        max(
+            when(col('action') == 'page_load', col('timestamp'))
+        ).alias('page_load'),
+        min(
+            when(col('action') == 'page_exit', col('timestamp'))
+        ).alias('page_exit')
+    )
+    .filter(
+        col('page_load') < col('page_exit')
+    )
+    .groupBy('user_id')
+    .agg(
+        avg(col('page_exit').cast(LongType()) - col('page_load').cast(LongType())).alias('avg_session_time')
+    )
+)
+
+# To validate your solution, convert your final PySpark df to a pandas df
+res.toPandas()
